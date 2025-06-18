@@ -8,7 +8,7 @@ This project is a full-stack AI-powered assistant designed to help researchers i
 
 The application follows a modular serverless architecture built using AWS services and Vite + React on the frontend. Authentication is managed via Amazon Cognito and integrated with Amplify’s Authenticator UI for secure user access. The frontend interfaces with backend services deployed via AWS Lambda and API Gateway. Application logic utilizes Amazon Bedrock to perform generative AI tasks, while rejecting any prompts with profanities (content filtering). All resources are hosted in the AWS cloud, leveraging best practices for scalability, security, and cost-efficiency. Static assets are delivered using Amazon S3 and CloudFront, and usage is monitored via CloudWatch to ensure reliable performance and observability.
 
-DIAGRAM GOES HERE
+![Architecture Diagram](./fullStackBedrockDiagram.png)
 
 ---
 
