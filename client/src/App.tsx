@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { Amplify } from 'aws-amplify';
 import IdeationForm from './components/IdeationForm';
 import IdeationOutput from './components/IdeationOutput';
+import ChatInterface from './pages/ChatInterface';
 import Navigation from './components/Navigation';
 import ProtectedRoute from './components/ProtectedRoute';
 import { AuthProvider } from './contexts/AuthContext';
@@ -40,18 +41,25 @@ const AppContent: React.FC = () => {
   };
 
   return (
+    // <>
+    //   <Navigation />
+    //   <Container className="container">
+    //     <h1 className="mb-4">Research Ideation Assistant</h1>
+    //     <IdeationForm onSubmit={handleSubmit} />
+    //     {loading && (
+    //       <div className="text-center my-4">
+    //         <Spinner animation="border" role="status" />
+    //         <div>Generating...</div>
+    //       </div>
+    //     )}
+    //     <IdeationOutput output={output} />
+    //   </Container>
+    // </>
     <>
       <Navigation />
       <Container className="container">
-        <h1 className="mb-4">Research Ideation Assistant</h1>
-        <IdeationForm onSubmit={handleSubmit} />
-        {loading && (
-          <div className="text-center my-4">
-            <Spinner animation="border" role="status" />
-            <div>Generating...</div>
-          </div>
-        )}
-        <IdeationOutput output={output} />
+        <h1 className="mb-4">Research Ideation Chat Assistant</h1>
+        <ChatInterface />
       </Container>
     </>
   );

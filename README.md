@@ -65,6 +65,9 @@ Users can:
 - Receive AI-generated suggestions based on prompts powered by Amazon Bedrock, which leverages foundational models (in this case it is set to Amazon Nova).
 - All interactions are handled securely through a Lambda function that invokes Bedrock via the AWS SDK
 - Each session can be terminated using the Sign Out button in the top navigation, which revokes the session and returns the user to the login page
+- We keep track of the chat history for each conversation where we pass in the entire chat to the LLM to ensure that a more informative response based on the entire context
+
+The chat interface has a loading animation to ensure a smoother and more informative UX
 
 ---
 
@@ -77,6 +80,7 @@ The application follows AWS-recommended security best practices across all compo
 - The frontend uses Amplify’s Authenticator component, which provides built-in protection against common attacks (XSS, CSRF, token hijacking).
 - Access to the app is restricted to authenticated users only
 - Sign up requires MFA through email and passwords are designed to require a special character, number, and an uppercase character to ensure security
+- We limit the number of requests a single user can make to the LLM to ensure that users do not abuse the service (rate limiting through API gateway)
 
 ### 2. IAM Role Configuration
 To minimize risk and follow the principle of least privilege:
@@ -94,6 +98,56 @@ Amazon CloudWatch is enabled for the Lambda backend to track:
 - API invocation metrics
 - Any anomalies or unauthorized usage can be detected via configurable CloudWatch alarms
 - Furthermore, we are logging any prompts that get filtered out through the content filtering mechanism (currently limited to profanities)
+- We also log the LLM's response length alongside the user ID that requested it
 
 ### 5. CORS and API Gateway Protection
 The API Gateway used to trigger Lambda is configured with CORS policies to only accept requests from the frontend’s domain (e.g http://localhost:5173). It is throttled to prevent abuse using usage plans or rate limiting.
+
+---
+
+## Performance Analysis Summary
+The Lambda function logs Bedrock model response time for each request using time.time() difference before and after the model invocation.
+
+Metrics captured include:
+
+- User ID
+- Prompt Length
+- Response Length
+- Generation Time (seconds)
+
+These logs are stored in CloudWatch, enabling runtime performance audits and analysis of generation efficiency. In future versions, we will include Alarms to notify us if a response took too long to generate, ensuring a consistent and smooth user experience
+
+---
+
+## Deployment Guide 
+
+### Prerequisites
+- AWS Account
+- AWS CLI configured (ensure that the user has the right privileges too)
+- Node.js (v20+) + npm
+- Python 3.9+ with pip
+- Git
+
+### Frontend (Vite + React + Amplify Auth)
+- Install dependencies:
+```
+cd client
+npm install
+```
+
+- Set environment variables in .env:
+```
+VITE_API_URL=https://your-api-gateway-url.amazonaws.com/prod/generate
+```
+
+- Build for production:
+```
+npm run build
+```
+
+- Deploy to hosting provider using your provider of choice. We recommend Vercel, Firebase, or HostGator
+
+### Backend 
+The backend deployment comes in 2 steps: 
+1) Deploy the lambda code using AWS SAM and set up the appropriate resources and API Gateway endpoint. Make sure to add the appropriate permissions to the lambda to invoke the bedrock model 
+2) Deploy to EC2 instance. Since we're using the Flask backend as a middleware to communicate with the Lambda and Bedrock model (the reason we're doing this is to potentially scale this project to a full working app with more features), we need to deploy the Flask server to an EC2 nstance. Ensure that CORS is properly configured to allow the frontend domain and use Docker for a better deployment experience. 
